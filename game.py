@@ -7,7 +7,7 @@ import os
 COLUMN_NAMES = ['Name', 'Score']
 
 
-def user_name_answer():
+def get_user_name_answers():
     name = input('Enter u name: ')
     print()
     score = 0
@@ -51,7 +51,7 @@ def rewrite_user_score(name, score, score_file):
 
 
 def main():
-    name, score = user_name_answer()
+    name, score = get_user_name_answers()
 
     if not Path('Score.csv').exists():
         create_score_file(name, score, 'Score.csv')
