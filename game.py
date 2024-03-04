@@ -1,6 +1,5 @@
 import random
 from pathlib import Path
-import pickle
 import csv
 import os
 
@@ -30,22 +29,28 @@ def user_name_answer():
 
 
 def create_score_file(name, score, score_file):
-    with open(score_file, 'w') as score_file, open('results_dict.pkl', 'wb') as pickle_file:
+    with open(score_file, 'w') as score_file:
         writer = csv.writer(score_file)
         writer.writerow(COLUMN_NAMES)
         writer.writerow([name, score])
-        results_dict = {name: score}
-        pickle.dump(results_dict, pickle_file)
 
 
-def rewrite_user_score(name, score, score_file):
-    with open(f'{score_file}') as old_file, open('temp_file.csv', 'w') as temp_file:
+def filling_score_file (name, score, score_file):
+    with open(score_file) as old_file, open('temp_file.csv', 'a') as temp_file:
         writer = csv.writer(temp_file)
         reader = csv.reader(old_file)
+        found = False
         for row in reader:
             if name == row[0]:
-                row = [name, score]
-            writer.writerow(row)
+                new_score = score + int(row[1])
+                row = [name, new_score]
+                writer.writerow(row)
+                found = True
+            else:
+                writer.writerow(row)
+        if not found:
+            writer.writerow([name, score])
+
     os.remove('Score.csv')
     os.rename('temp_file.csv', 'Score.csv')
 
@@ -56,17 +61,7 @@ def main():
     if not Path('Score.csv').exists():
         create_score_file(name, score, 'Score.csv')
     else:
-        with open('Score.csv', 'a') as score_file, open('results_dict.pkl', 'rb') as pickle_file:
-            results_dict = pickle.load(pickle_file)
-            if name in results_dict:
-                score += results_dict[name]
-                rewrite_user_score(name, score, 'Score.csv')
-            writer = csv.writer(score_file)
-            writer.writerow([name, score])
-
-    results_dict[name] = score
-    with open('results_dict.pkl', 'wb') as pickle_file:
-        pickle.dump(results_dict, pickle_file)
+        filling_score_file(name, score, 'Score.csv')
 
 
 main()
